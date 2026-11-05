@@ -1,0 +1,187 @@
+# Forge manifest of Screen Self-Service for Jira. Declares the project settings and Jira admin Custom UI
+# pages, the nightly scheduled trigger, the Screen Assistant Rovo agent with its five actions, the function
+# handlers exported by src/index.ts, the UI, agent prompt and icon resources, and the Jira and storage
+# scopes the app needs, and Marketplace licensing (paid app).
+#
+# @file        manifest.yml
+# @app         Screen Self-Service for Jira
+# @author      George Papasotiriou
+# @company     SUPERPORT
+# @created     2026-10-29
+# @updated     2026-11-05
+
+modules:
+  jira:projectSettingsPage:
+    - key: sss-project-settings
+      resource: main
+      resolver:
+        function: resolver
+      title: Screen Self-Service for Jira
+      icon: resource:icons;icon.svg
+      layout: blank
+  jira:adminPage:
+    - key: sss-admin
+      resource: main
+      resolver:
+        function: resolver
+      title: Screen Self-Service for Jira
+      icon: resource:icons;icon.svg
+      layout: blank
+  scheduledTrigger:
+    - key: sss-nightly
+      function: nightly
+      interval: day
+  rovo:agent:
+    - key: screen-assistant
+      name: Screen Assistant
+      icon: resource:icons;screen-assistant.png
+      description: Helps project admins understand and manage the screens of their
+        company-managed Jira project.
+      prompt: resource:agent-res;prompt.txt
+      conversationStarters:
+        - Which screens does my project use?
+        - Why can't I edit the Default Screen?
+        - Which unused screens will be deleted soon?
+        - Add a field to the Bug create screen
+      actions:
+        - list-project-screens
+        - explain-screen
+        - find-unused-screens
+        - add-field-to-screen
+        - remove-field-from-screen
+  action:
+    - key: list-project-screens
+      name: List project screens
+      function: rovoListScreens
+      actionVerb: GET
+      description: Lists every issue type of a Jira project with its Default, Create,
+        Edit and View screen, whether each is editable or shared, and the
+        transition screens.
+      inputs:
+        projectKey:
+          title: Project key
+          type: string
+          required: false
+          description: Key of the Jira project, e.g. PROJ. Optional when the user is
+            inside a project.
+    - key: explain-screen
+      name: Explain a screen
+      function: rovoExplainScreen
+      actionVerb: GET
+      description: Explains one screen of a project — its tabs and fields, where it is
+        used, and why it is locked if it is shared.
+      inputs:
+        projectKey:
+          title: Project key
+          type: string
+          required: false
+          description: Key of the Jira project.
+        screen:
+          title: Screen
+          type: string
+          required: true
+          description: Screen name, part of the name, or id.
+    - key: find-unused-screens
+      name: Find unused screens
+      function: rovoUnusedScreens
+      actionVerb: GET
+      description: Lists unused screens and screen schemes of a project and their
+        scheduled deletion dates.
+      inputs:
+        projectKey:
+          title: Project key
+          type: string
+          required: false
+          description: Key of the Jira project.
+    - key: add-field-to-screen
+      name: Add field to screen
+      function: rovoAddField
+      actionVerb: UPDATE
+      description: Adds a field to a screen that belongs only to the project (adds it
+        to the project's field scheme if needed). Shared screens are refused.
+      inputs:
+        projectKey:
+          title: Project key
+          type: string
+          required: false
+          description: Key of the Jira project.
+        screen:
+          title: Screen
+          type: string
+          required: true
+          description: Screen name, part of the name, or id.
+        field:
+          title: Field
+          type: string
+          required: true
+          description: Field name or id, e.g. "Story points" or customfield_10016.
+        tab:
+          title: Tab
+          type: string
+          required: false
+          description: Name of the tab to add the field to. Defaults to the first tab.
+    - key: remove-field-from-screen
+      name: Remove field from screen
+      function: rovoRemoveField
+      actionVerb: UPDATE
+      description: Removes a field from a screen that belongs only to the project.
+        Shared screens and required fields are refused.
+      inputs:
+        projectKey:
+          title: Project key
+          type: string
+          required: false
+          description: Key of the Jira project.
+        screen:
+          title: Screen
+          type: string
+          required: true
+          description: Screen name, part of the name, or id.
+        field:
+          title: Field
+          type: string
+          required: true
+          description: Field name or id.
+  function:
+    - key: resolver
+      handler: index.handler
+    - key: nightly
+      handler: index.nightly
+      timeoutSeconds: 900
+    - key: rovoListScreens
+      handler: index.rovoListScreens
+    - key: rovoExplainScreen
+      handler: index.rovoExplainScreen
+    - key: rovoUnusedScreens
+      handler: index.rovoUnusedScreens
+    - key: rovoAddField
+      handler: index.rovoAddField
+    - key: rovoRemoveField
+      handler: index.rovoRemoveField
+resources:
+  - key: main
+    path: static/app/dist
+    tunnel:
+      port: 5173
+  - key: agent-res
+    path: resource/agent
+  - key: icons
+    path: resource/icons
+permissions:
+  scopes:
+    - read:jira-work
+    - read:jira-user
+    - manage:jira-project
+    - manage:jira-configuration
+    - storage:app
+  content:
+    styles:
+      - unsafe-inline
+app:
+  runtime:
+    name: nodejs22.x
+  id: ari:cloud:ecosystem::app/58fe9539-8e23-4e79-ae45-401928826b5b
+  # Paid Marketplace app (prices are set in the partner portal). Every resolver, Rovo action and the
+  # nightly trigger refuse when context.license.isActive is false (src/backend/auth.ts, nightly()).
+  licensing:
+    enabled: true

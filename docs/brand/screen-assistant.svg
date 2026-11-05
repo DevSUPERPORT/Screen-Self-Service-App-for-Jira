@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 880 880" width="880" height="880">
+  <title>Screen Assistant</title>
+  <defs><mask id="m"><rect width="880" height="880" fill="#fff"/><circle cx="442" cy="462" r="105" fill="#000"/><circle cx="439" cy="863.7" r="248.7" fill="#000"/></mask></defs>
+  <rect width="880" height="880" fill="#fff"/>
+  <circle cx="440" cy="473" r="268" fill="#000" mask="url(#m)"/>
+</svg>

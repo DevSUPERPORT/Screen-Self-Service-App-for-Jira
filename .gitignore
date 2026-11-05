@@ -1,0 +1,53 @@
+# Dependencies
+node_modules/
+static/app/node_modules/
+
+# Build output (built by `npm run build:ui` before deploying)
+static/app/dist/
+dist/
+coverage/
+
+# Environment / secrets
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+
+# Internal documents (kept outside the repo); public docs are re-included below
+docs/*
+!docs/DOCUMENTATION.md
+!docs/DATA_SECURITY_PRIVACY.md
+!docs/THREAT_MODEL.md
+!docs/FAILURE_DESIGN.md
+!docs/PERFORMANCE.md
+!docs/api-reference.md
+!docs/brand/
+docs/brand/app-icon-original.jpg
+!docs/marketplace/
+docs/marketplace/LISTING.md
+docs/marketplace/README.md
+*.pdf
+*.docx
+
+# AI assistant files
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+AGENTS.md
+.cursor/
+.cursorrules
+.windsurfrules
+.aider*
+.github/copilot-instructions.md
+.copilot/
+.codex/
+.gemini/
+GEMINI.md
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
